@@ -1,0 +1,9 @@
+namespace: monitoring
+global:
+    svc:
+        elasticsearch:
+            name: elasticsearch
+            port: 9200
+        kibana:
+            name: kibana
+            port: 5601

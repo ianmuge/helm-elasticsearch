@@ -1,0 +1,18 @@
+deployment:
+  name: kibana
+  replicaCount: 1
+  image:
+    repository: docker.elastic.co/kibana/kibana
+    tag: "7.8.0"
+service:
+  name: kibana
+  svc:
+    name: http
+    port: 5601
+    protocol: TCP
+    targetPort: 5601
+configMap:
+  name: kibana
+
+
+

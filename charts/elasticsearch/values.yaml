@@ -1,0 +1,19 @@
+statefulSet:
+  name: elasticsearch
+  replicaCount: 3
+  cluster: monitoring
+  storage: 5Gi
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: "7.8.0"
+service:
+  name: elasticsearch
+  svc:
+    - name: http
+      port: 9200
+      protocol: TCP
+    - name: transport
+      port: 9300
+      protocol: TCP
+
+

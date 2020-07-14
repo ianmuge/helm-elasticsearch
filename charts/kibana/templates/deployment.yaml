@@ -1,0 +1,64 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Values.deployment.name }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app: {{ $.Values.deployment.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $.Values.deployment.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.deployment.name }}
+    spec:
+      containers:
+      - name: {{ $.Values.deployment.name }}
+        image: {{ $.Values.deployment.image.repository }}:{{ $.Values.deployment.image.tag }}
+        resources:
+          limits:
+            cpu: 1
+            memory: 512M
+          requests:
+            cpu: 0.05
+            memory: 128M
+        env:
+          - name: SERVER_UUID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: SERVER_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        ports:
+        - containerPort: {{$.Values.service.svc.port}}
+          name: {{$.Values.service.svc.name}}
+          protocol: {{$.Values.service.svc.protocol}}
+        readinessProbe:
+            httpGet:
+              path: /app/kibana
+              port: {{$.Values.service.svc.port}}
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 10
+        livenessProbe:
+            tcpSocket:
+              port: {{$.Values.service.svc.port}}
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 10
+        volumeMounts:
+          - name: kibana-settings-config-volume
+            mountPath: /usr/share/kibana/config
+      volumes:
+        - name: kibana-settings-config-volume
+          configMap:
+            name: {{ $.Values.configMap.name }}
+            items:
+              - key: kibana.yml
+                path: kibana.yml

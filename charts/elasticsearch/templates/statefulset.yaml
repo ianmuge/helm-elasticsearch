@@ -1,0 +1,113 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $.Values.statefulSet.name }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  serviceName: {{ $.Values.service.name }}
+  replicas: {{ $.Values.statefulSet.replicaCount }}
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ $.Values.statefulSet.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.statefulSet.name }}
+    spec:
+      affinity: 
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - {{ $.Values.statefulSet.name }}
+                topologyKey: kubernetes.io/hostname
+      containers:
+      - name: {{ $.Values.statefulSet.name }}
+        image: {{ $.Values.statefulSet.image.repository }}:{{ $.Values.statefulSet.image.tag }}
+        resources: 
+          limits:
+            cpu: 1
+            memory: 512m
+          requests:
+            cpu: 0.1
+            memory: 300m
+        ports:
+        {{- range $idx,$serv := $.Values.service.svc }}
+          - containerPort: {{ $serv.port }}
+            name: {{ $serv.name }}
+            protocol: {{ $serv.protocol }}
+        {{- end }}
+        livenessProbe:
+            tcpSocket:
+              port: {{(index $.Values.service.svc 1).port}}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 10
+        readinessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /_cluster/health?local=true
+              port: {{(index $.Values.service.svc 0).port}}
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 10
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+        env:
+          - name: cluster.name
+            value: {{ $.Values.statefulSet.cluster }}
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: discovery.seed_hosts
+            value: {{ $.Values.service.name }}
+          - name: cluster.initial_master_nodes
+            value: "{{ include "elasticsearch.initialNodes" . }}"
+          - name: ES_JAVA_OPTS
+            value: "-Xms256m -Xmx256m"
+          - name: xpack.security.enabled
+            value: "false"
+          - name: xpack.monitoring.enabled
+            value: "true"
+          - name: xpack.monitoring.collection.enabled
+            value: "true"
+      initContainers:
+      - name: fix-ownership
+        image: busybox
+        command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      - name: increase-vm-max-map
+        image: busybox
+        command: ["sysctl", "-w", "vm.max_map_count=262144"]
+        securityContext:
+          privileged: true
+      - name: increase-fd-ulimit
+        image: busybox
+        command: ["sh", "-c", "ulimit -n 65536"]
+        securityContext:
+          privileged: true              
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app: {{ $.Values.statefulSet.name }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: {{ $.Values.statefulSet.storage }}
