@@ -3,7 +3,7 @@ deployment:
   replicaCount: 1
   image:
     repository: docker.elastic.co/kibana/kibana
-    tag: "7.8.0"
+    tag: "7.7.0"
 service:
   name: kibana
   svc:
@@ -13,6 +13,15 @@ service:
     targetPort: 5601
 configMap:
   name: kibana
+global:
+    namespace: monitoring
+    svc:
+        elasticsearch:
+            name: elasticsearch
+            port: 9200
+        kibana:
+            name: kibana
+            port: 5601
 
 
 

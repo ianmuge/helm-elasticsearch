@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $.Values.deployment.name }}
-  namespace: {{ $.Values.namespace }}
+  namespace: {{ $.Values.global.namespace }}
   labels:
     app: {{ $.Values.deployment.name }}
 spec:
@@ -21,11 +21,11 @@ spec:
         image: {{ $.Values.deployment.image.repository }}:{{ $.Values.deployment.image.tag }}
         resources:
           limits:
-            cpu: 1
-            memory: 512M
+            cpu: 1000m
+            memory: 1G
           requests:
-            cpu: 0.05
-            memory: 128M
+            cpu: 50m
+            memory: 256M
         env:
           - name: SERVER_UUID
             valueFrom:
@@ -36,19 +36,19 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
         ports:
-        - containerPort: {{$.Values.service.svc.port}}
+        - containerPort: {{$.Values.service.svc.targetPort}}
           name: {{$.Values.service.svc.name}}
           protocol: {{$.Values.service.svc.protocol}}
         readinessProbe:
             httpGet:
               path: /app/kibana
-              port: {{$.Values.service.svc.port}}
+              port: {{$.Values.service.svc.targetPort}}
             initialDelaySeconds: 60
             timeoutSeconds: 5
             failureThreshold: 10
         livenessProbe:
             tcpSocket:
-              port: {{$.Values.service.svc.port}}
+              port: {{$.Values.service.svc.targetPort}}
             initialDelaySeconds: 60
             timeoutSeconds: 10
             failureThreshold: 10

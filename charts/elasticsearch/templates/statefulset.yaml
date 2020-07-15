@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ $.Values.statefulSet.name }}
-  namespace: {{ $.Values.namespace }}
+  namespace: {{ $.Values.global.namespace }}
 spec:
   serviceName: {{ $.Values.service.name }}
   replicas: {{ $.Values.statefulSet.replicaCount }}
@@ -34,11 +34,11 @@ spec:
         image: {{ $.Values.statefulSet.image.repository }}:{{ $.Values.statefulSet.image.tag }}
         resources: 
           limits:
-            cpu: 1
-            memory: 512m
+            cpu: 1000m
+            memory: 1G
           requests:
-            cpu: 0.1
-            memory: 300m
+            cpu: 100m
+            memory: 512m
         ports:
         {{- range $idx,$serv := $.Values.service.svc }}
           - containerPort: {{ $serv.port }}

@@ -1,0 +1,20 @@
+daemonset:
+  name: metricbeat
+  cluster: monitoring
+  image: 
+    repository: docker.elastic.co/beats/metricbeat
+    tag: "7.7.0"
+deployment:
+  name: metricbeat
+  cluster: monitoring
+  image: 
+    repository: docker.elastic.co/beats/metricbeat
+    tag: "7.7.0"
+configMap:
+  name: metricbeat
+serviceAccount:
+  name: metricbeat
+clusterRole:
+  name: metricbeat
+app:
+  name: metricbeat

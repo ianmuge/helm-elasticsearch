@@ -3,12 +3,12 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $.Values.configMap.name }}
-  namespace: {{ $.Values.namespace }}
+  namespace: {{ $.Values.global.namespace }}
   labels:
     app: {{ $.Values.configMap.name }}
 data:
   kibana.yml: |-
-    elasticsearch.hosts: "http://{{$.Values.global.svc.elasticsearch.name}}:{{$.Values.global.svc.elasticsearch.port}}"
-    xpack.monitoring.enabled: true
-    xpack.monitoring.kibana.collection.enabled: true
+    elasticsearch.hosts: 'http://{{$.Values.global.svc.elasticsearch.name | default "elasticsearch"}}:{{$.Values.global.svc.elasticsearch.port | default "9200"}}'
+    # xpack.monitoring.enabled: true
+    # xpack.monitoring.kibana.collection.enabled: true
     server.host: "0.0.0.0"
