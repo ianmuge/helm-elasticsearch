@@ -107,7 +107,7 @@ spec:
         app: {{ $.Values.statefulSet.name }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: standard
+      storageClassName: {{ $.Values.statefulSet.storageType | default "standard" }}
       resources:
         requests:
-          storage: {{ $.Values.statefulSet.storage }}
+          storage: {{ $.Values.statefulSet.storageSize | default "50Gi" }}

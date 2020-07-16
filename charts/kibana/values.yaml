@@ -1,9 +1,9 @@
 deployment:
   name: kibana
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: docker.elastic.co/kibana/kibana
-    tag: "7.7.0"
+    tag: "7.6.0"
 service:
   name: kibana
   svc:
@@ -22,6 +22,3 @@ global:
         kibana:
             name: kibana
             port: 5601
-
-
-

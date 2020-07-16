@@ -3,13 +3,13 @@ daemonset:
   cluster: monitoring
   image: 
     repository: docker.elastic.co/beats/metricbeat
-    tag: "7.7.0"
+    tag: "7.6.0"
 deployment:
   name: metricbeat
   cluster: monitoring
   image: 
     repository: docker.elastic.co/beats/metricbeat
-    tag: "7.7.0"
+    tag: "7.6.0"
 configMap:
   name: metricbeat
 serviceAccount:

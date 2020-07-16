@@ -2,10 +2,11 @@ statefulSet:
   name: elasticsearch
   replicaCount: 3
   cluster: monitoring
-  storage: 10Gi
+  storageSize: 50Gi
+  storageType: ssd
   image:
     repository: docker.elastic.co/elasticsearch/elasticsearch
-    tag: "7.7.0"
+    tag: "7.6.0"
 service:
   name: elasticsearch
   svc:
